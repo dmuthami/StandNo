@@ -4,6 +4,9 @@
 ## Run script as a script tool
 ##
 ##Challenge:Create Geoprocessing service for running on the web.
+
+## Created by : dmuthami
+## Updated : 12/04/2015
 ##
 ######################################################################
 
@@ -38,7 +41,7 @@ try:
     workspace=arcpy.GetParameterAsText(0)#Get from console or GUI being user input
     if workspace =='': #Checks if supplied parameter is null
         #Defaults to below hardcoded path if the parameter is not supplied. NB. May throw exceptions if it defaults to path below
-        workspace=r"E:\GIS Data\Namibia ULIMS\GIS\Database_Connections\gisadmin@localhost@ulims_publication.sde"
+        workspace=r"C:\DAVID-MUTHAMI\GIS Data\Namibia ULIMS\GIS\Datasource\Okahandja\Database\Okahandja\Okahandja.gdb"
 
     #workspace
     #Supports enterprise, file geodatabases
@@ -48,7 +51,7 @@ try:
 	##Acquire it as a parameter
     featureClass = arcpy.GetParameterAsText(1)#Get from console or GUI being user input
     if featureClass == "":#Checks if supplied parameter is null
-        featureClass="otjiwarongo_Parcels"#Defaults to otjiwarongo_Parcels part of a parcel fabric.Nb. May throw unnecessary exceptions and tool may fail
+        featureClass="okahandja_Parcels"#Defaults to okahandja_Parcels part of a parcel fabric.Nb. May throw unnecessary exceptions and tool may fail
 
     ##Objectid field
 	##Acquire it as a parameter
@@ -60,13 +63,13 @@ try:
 	##Acquire it as a parameter
     standNo_fieldName = arcpy.GetParameterAsText(3)#Get from console or GUI being user input
     if standNo_fieldName == "": #Checks if supplied parameter is null
-        standNo_fieldName="oj_stand_no" #Defaults to OBJECTID.Nb. May throw unnecessary exceptions and tool may fail
+        standNo_fieldName="oh_stand_no" #Defaults to OBJECTID.Nb. May throw unnecessary exceptions and tool may fail
 
     ##SLocal_authority ID
 	##Acquire it as a parameter
     local_authority_id_fieldName = arcpy.GetParameterAsText(4)#Get from console or GUI being user input
     if local_authority_id_fieldName == "":#Checks if supplied parameter is null
-        local_authority_id_fieldName="oj_local_authority_id" #Defaults to oj_local_authority_id.Nb. May throw unnecessary exceptions and tool may fail
+        local_authority_id_fieldName="oh_local_authority_id" #Defaults to oh_local_authority_id.Nb. May throw unnecessary exceptions and tool may fail
 
     ##------------------------------------------------------------------------------------
     ##------------------Beginning of Functions--------------------------------------------
@@ -134,6 +137,9 @@ try:
 
     update_stand_no = "";#initialize variable to string of length zero
 
+    #SQL expression to select only the stand numbers that are null
+    SQLExp = standNo_fieldName + " is Null"
+
     # Start an edit session. Must provide the worksapce.
     edit = arcpy.da.Editor(env.workspace)
 
@@ -146,7 +152,7 @@ try:
     edit.startOperation()
 
     #Update cursor goes here
-    with arcpy.da.UpdateCursor(featureClass, fields) as cursor:
+    with arcpy.da.UpdateCursor(featureClass, fields,SQLExp) as cursor:
         for row in cursor:# loops per record in the recordset and returns an aray of objects
             #Call functions below compute stand no
             update_stand_no = createStandNo(row[2],row[1])
@@ -183,10 +189,6 @@ except:
 
     ##For debugging purposes only
     ##To be commented on python script
-    #print pymsg
-    #print "\n" +msgs
-
-
-
-
+    print pymsg
+    print "\n" +msgs
 
